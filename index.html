@@ -438,7 +438,7 @@ select { width: 100%; padding: 10px 12px; border: 1.5px solid var(--border); bor
 </div>
 
 <script>
-const GAS_URL = 'https://script.google.com/macros/s/AKfycbxFUqv_mLpwim88f60GpxxzLWyGMaxPnHy82yNowjVK4rQJmJcCAdA9xrQNU6dcQi6puQ/exec';
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbyn80OqKuNnALWCXKeLZ0CMayDG2k2Y1jkp8_YUN6Tto9LUK4lPE1xplMNffxpPwlK0lw/exec';
 const ADMIN_PW = 'testcor2026';
 
 const DEPT_MAP = {
@@ -841,7 +841,7 @@ async function submitForm() {
   for(let i=6;i<=18;i++) { if(!(document.getElementById('q'+i)?.value.trim())){ alert(`Q${i}에 답해주세요.`); return; } }
   // Q19~Q25 필수
   for(let i=19;i<=25;i++) { if(!(document.getElementById('q'+i)?.value.trim())){ alert(`Q${i}에 답해주세요.`); return; } }
-  const data = { name, site, dept };
+  const data = { 이름: name, 사업장: site, 사업부: dept, name, site, dept };
   for(let i=1;i<=5;i++) data['q'+i] = document.querySelector(`input[name="q${i}"]:checked`)?.value||'';
   for(let i=6;i<=25;i++) data['q'+i] = document.getElementById('q'+i)?.value||'';
   data.q26 = document.getElementById('q26').value;
