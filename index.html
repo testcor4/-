@@ -428,7 +428,7 @@ select { width: 100%; padding: 10px 12px; border: 1.5px solid var(--border); bor
       <div class="dept-tabs" id="deptTabs"></div>
       <div style="overflow-x:auto">
         <table class="resp-table">
-          <thead><tr><th>이름</th><th>사업장</th><th>사업부</th><th>기본점수</th><th>키워드점수</th><th>Q26+3점</th><th>사업부장+5점</th><th>합계</th></tr></thead>
+          <thead><tr><th>이름</th><th>사업장</th><th>사업부</th><th>객관식/50</th><th>키워드/39</th><th>적용형/7</th><th>Q26+3</th><th>부장+5</th><th>합계</th><th>상세</th></tr></thead>
           <tbody id="respBody"></tbody>
         </table>
       </div>
@@ -576,11 +576,21 @@ function renderDash(rows) {
   // 통계
   const total = scored.length;
   const avg = total ? Math.round(scored.reduce((s,r)=>s+r.total,0)/total) : 0;
+  // 사업부별 평균
+  const deptAvg = {};
+  Object.keys(MEMBERS).forEach(d => {
+    const members = scored.filter(r=>(r.사업부||r.dept)===d);
+    if(members.length) deptAvg[d] = Math.round(members.reduce((s,r)=>s+r.total,0)/members.length);
+  });
+  const topDept = Object.entries(deptAvg).sort((a,b)=>b[1]-a[1])[0];
+
   document.getElementById('statCards').innerHTML = `
     <div class="stat-card"><div class="num">${total}</div><div class="lbl">총 응답</div></div>
     <div class="stat-card"><div class="num">${avg}</div><div class="lbl">평균점수</div></div>
     <div class="stat-card"><div class="num">${scored.filter(r=>r.obj===50).length}</div><div class="lbl">객관식 만점</div></div>
     <div class="stat-card"><div class="num">${scored.filter(r=>r.total>=80).length}</div><div class="lbl">80점↑</div></div>
+    <div class="stat-card"><div class="num">${topDept?topDept[0].replace('사업부','').replace('사업',''):'–'}</div><div class="lbl">최고 평균 사업부</div></div>
+    <div class="stat-card"><div class="num">${topDept?topDept[1]:'–'}</div><div class="lbl">최고 평균점수</div></div>
   `;
   // 순위
   const sorted = [...scored].sort((a,b)=>b.total-a.total).slice(0,3);
@@ -593,36 +603,8 @@ function renderDash(rows) {
       <div class="score">${r.total}점</div>
     </div>`).join('');
 
-  // Q26 사업부별 최다득표 +3점 자동 반영
-  const votesByDept = {};
-  scored.forEach(r => {
-    const dept = r.사업부||r.dept||'';
-    const v = r.q26;
-    if(v && dept) {
-      if(!votesByDept[dept]) votesByDept[dept] = {};
-      votesByDept[dept][v] = (votesByDept[dept][v]||0)+1;
-    }
-  });
-  // 사업부별 최다득표자 찾기
-  const deptWinners = {};
-  Object.entries(votesByDept).forEach(([dept, votes]) => {
-    const winner = Object.entries(votes).sort((a,b)=>b[1]-a[1])[0];
-    if(winner) deptWinners[dept] = { name: winner[0], votes: winner[1] };
-  });
-  // 최다득표자에게 +3점 반영
-  scored.forEach(r => {
-    const dept = r.사업부||r.dept||'';
-    const name = r.이름||r.name||'';
-    if(deptWinners[dept] && deptWinners[dept].name === name) {
-      r.voteBonus = 3;
-      r.total = r.total + 3;
-    } else {
-      r.voteBonus = 0;
-    }
-  });
-
-  // 사업부장 Q26 추천 → 추천받은 사람 +5점
-  const managerPicks = {}; // { dept: 추천받은사람 }
+  // ① 사업부장 Q26 선택 → 추천받은 사람 +5점 (사업부장 투표는 일반 집계에서 제외)
+  const managerPicks = {}; // { dept: 추천받은사람이름 }
   scored.forEach(r => {
     const dept = r.사업부||r.dept||'';
     const name = r.이름||r.name||'';
@@ -633,12 +615,35 @@ function renderDash(rows) {
   scored.forEach(r => {
     const dept = r.사업부||r.dept||'';
     const name = r.이름||r.name||'';
-    if(managerPicks[dept] && managerPicks[dept] === name) {
-      r.managerBonus = 5;
-      r.total = r.total + 5;
-    } else {
-      r.managerBonus = 0;
+    r.managerBonus = (managerPicks[dept] && managerPicks[dept] === name) ? 5 : 0;
+  });
+
+  // ② 일반 직원 Q26 최다득표 +3점 (사업부장 투표 제외하고 집계)
+  const votesByDept = {};
+  scored.forEach(r => {
+    const dept = r.사업부||r.dept||'';
+    const name = r.이름||r.name||'';
+    const v = r.q26;
+    // 사업부장 본인 투표는 제외
+    if(v && dept && MANAGERS[dept] !== name) {
+      if(!votesByDept[dept]) votesByDept[dept] = {};
+      votesByDept[dept][v] = (votesByDept[dept][v]||0)+1;
     }
+  });
+  const deptWinners = {};
+  Object.entries(votesByDept).forEach(([dept, votes]) => {
+    const sorted = Object.entries(votes).sort((a,b)=>b[1]-a[1]);
+    if(sorted.length) deptWinners[dept] = { name: sorted[0][0], votes: sorted[0][1] };
+  });
+  scored.forEach(r => {
+    const dept = r.사업부||r.dept||'';
+    const name = r.이름||r.name||'';
+    r.voteBonus = (deptWinners[dept] && deptWinners[dept].name === name) ? 3 : 0;
+  });
+
+  // ③ 최종 점수 반영 (중복 가산 가능 → 최대 +8점)
+  scored.forEach(r => {
+    r.total = r.total + r.voteBonus + r.managerBonus;
   });
   // Q26 득표 집계 (전체)
   const votes = {};
@@ -655,39 +660,154 @@ function renderDash(rows) {
     </table>` : '<div class="section-title">👑 사업부장 추천 현황</div><div style="color:var(--muted);font-size:13px;margin-bottom:16px">아직 사업부장 응답이 없습니다.</div>';
   document.getElementById('rankCards').insertAdjacentHTML('afterend', managerHTML);
 
-  document.getElementById('voteTable').innerHTML = vEntries.length ? `
+  // 추천자 상세 목록 (누가 누구를 추천했는지)
+  const voteDetail = scored
+    .filter(r => r.q26 && MANAGERS[r.사업부||r.dept||''] !== (r.이름||r.name||''))
+    .map(r => ({ from: r.이름||r.name||'', dept: r.사업부||r.dept||'', to: r.q26 }));
+
+  document.getElementById('voteTable').innerHTML = `
     <table class="vote-table">
-      <thead><tr><th>이름</th><th>득표수</th><th>비고</th></tr></thead>
-      <tbody>${vEntries.map((e,i)=>`<tr class="${i===0?'vote-winner':''}"><td>${e[0]}</td><td>${e[1]}표</td><td>${i===0?'🏆 최다득표 (+3점 대상)':''}</td></tr>`).join('')}</tbody>
-    </table>` : '<div style="color:var(--muted);font-size:13px">아직 추천 데이터가 없습니다.</div>';
+      <thead><tr><th>사업부</th><th>추천인</th><th>추천받은 사람</th><th>비고</th></tr></thead>
+      <tbody>${voteDetail.map(v => {
+        const isWinner = deptWinners[v.dept] && deptWinners[v.dept].name === v.to;
+        return \`<tr class="\${isWinner?'vote-winner':''}"><td>\${v.dept}</td><td>\${v.from}</td><td><strong>\${v.to}</strong></td><td>\${isWinner?'🏆 최다득표 (+3점)':''}</td></tr>\`;
+      }).join('')}</tbody>
+    </table>
+    ${voteDetail.length===0 ? '<div style="color:var(--muted);font-size:13px">아직 추천 데이터가 없습니다.</div>' : ''}`;
 
   // 사업부별 탭
   const depts = ['전체',...Object.keys(MEMBERS)];
   document.getElementById('deptTabs').innerHTML = depts.map((d,i)=>`<div class="dept-tab${i===0?' active':''}" onclick="filterDept('${d}',this)">${d==='기업부설연구소'?'연구소':d.replace('사업부','').replace('사업','')}</div>`).join('');
+  scored_global = scored;
   renderTable(scored, '전체');
 }
 
 function filterDept(dept, el) {
   document.querySelectorAll('.dept-tab').forEach(t=>t.classList.remove('active'));
   el.classList.add('active');
-  const scored = allRows.map(r=>({...r,...calcScore(r)}));
-  renderTable(scored, dept);
+  renderTable(scored_global, dept);
 }
 
 function renderTable(scored, dept) {
   const filtered = dept==='전체' ? scored : scored.filter(r=>(r.사업부||r.dept)===dept);
   const sorted = [...filtered].sort((a,b)=>b.total-a.total);
   document.getElementById('respBody').innerHTML = sorted.map(r=>`
-    <tr>
-      <td>${r.이름||r.name||'-'}</td>
+    <tr onclick="showDetail('${r.이름||r.name||''}', scored_global)" style="cursor:pointer">
+      <td><strong>${r.이름||r.name||'-'}</strong></td>
       <td>${r.사업장||r.site||''}</td>
       <td><span class="badge">${r.사업부||r.dept||''}</span></td>
-      <td>${r.obj||0}</td>
-      <td>${(r.kw||0)+(r.ap||0)}</td>
-      <td>${r.voteBonus||0}</td>
-      <td>${r.managerBonus||0}</td>
-      <td><strong>${r.total||0}점</strong></td>
-    </tr>`).join('') || '<tr><td colspan="6" style="text-align:center;color:var(--muted)">응답 없음</td></tr>';
+      <td style="text-align:center">${r.obj||0}<small>/50</small></td>
+      <td style="text-align:center">${(r.kw||0)}<small>/39</small></td>
+      <td style="text-align:center">${(r.ap||0)}<small>/7</small></td>
+      <td style="text-align:center;color:var(--green);font-weight:700">${r.voteBonus||0}</td>
+      <td style="text-align:center;color:var(--orange);font-weight:700">${r.managerBonus||0}</td>
+      <td style="text-align:center"><strong style="color:var(--brand)">${r.total||0}점</strong></td>
+      <td style="text-align:center;font-size:11px;color:var(--muted)">상세보기</td>
+    </tr>`).join('') || '<tr><td colspan="10" style="text-align:center;color:var(--muted)">응답 없음</td></tr>';
+}
+
+let scored_global = [];
+
+function showDetail(name, scored) {
+  const r = scored.find(x=>(x.이름||x.name||'')===name);
+  if(!r) return;
+  const dept = r.사업부||r.dept||'';
+  const OBJ_ANS = {q1:'b',q2:'c',q3:'b',q4:'b',q5:'b'};
+  const OBJ_Q = {
+    q1:'긴급지시 대응',q2:'이석기준',q3:'괴롭힘 법조항',q4:'피라미드 원칙',q5:'회식 2·3차 원칙'
+  };
+  const KW_Q = {
+    q6:'직장인 시각',q7:'GTD 4단계',q8:'이슈등급 4단계',q9:'CIPER 5단계',
+    q10:'호칭 원칙',q11:'전화매너',q12:'성희롱 판단기준',q13:'ERP 원칙',
+    q14:'법인카드',q15:'아이젠하워',q16:'프롬프트 5요소',q17:'AI 보안수칙',q18:'문서화 이유'
+  };
+  const KW_KEYS = {
+    q6:['배움','성장','전문가','투자형'],
+    q7:['수집','분류','실행','검토'],
+    q8:['즉시','1시간','당일','주간'],
+    q9:['상황','영향','현조치','에스컬레이션','해결책'],
+    q10:['님','생략'],
+    q11:['3콜','소속','이름','메모'],
+    q12:['의도','주관적','불쾌','피해자'],
+    q13:['증빙','권한','사실','적시','정확'],
+    q14:['업무목적','영수증','ERP','등록'],
+    q15:['즉시처리','위임','계획','삭제'],
+    q16:['역할','맥락','지시','형식','예시'],
+    q17:['고객정보','계약금액','내부문서','개인정보'],
+    q18:['인수인계','내가없어도','조직']
+  };
+  const AP_Q = {
+    q19:'직장인시각 적용',q20:'PREP 적용',q21:'예절 적용',q22:'ERP 적용',
+    q23:'AI활용 적용',q24:'Rule 적용',q25:'전체 적용'
+  };
+
+  // 객관식 상세
+  let objRows = Object.entries(OBJ_Q).map(([q,title])=>{
+    const ans = r[q]||''; const correct = OBJ_ANS[q];
+    const ok = ans===correct;
+    return `<tr><td>Q${q.slice(1)} ${title}</td><td style="text-align:center">${ans.toUpperCase()||'-'}</td><td style="text-align:center">${ok?'<span style="color:var(--green)">✅ 정답 (10점)</span>':'<span style="color:var(--red)">❌ 오답 (0점)</span>'}</td></tr>`;
+  }).join('');
+
+  // 주관식 키워드 상세
+  let kwRows = Object.entries(KW_Q).map(([q,title])=>{
+    const ans = r[q]||'';
+    const keys = KW_KEYS[q]||[];
+    const hits = keys.filter(k=>ans.includes(k));
+    const sc = hits.length>=2?3:hits.length===1?1:0;
+    const hitBadges = keys.map(k=>`<span style="padding:1px 6px;border-radius:10px;font-size:11px;background:${ans.includes(k)?'#1a7a4a':'#eee'};color:${ans.includes(k)?'#fff':'#999'}">${k}</span>`).join(' ');
+    return `<tr>
+      <td>Q${q.slice(1)} ${title}</td>
+      <td style="font-size:12px;max-width:300px">${ans||'<span style="color:#aaa">미작성</span>'}</td>
+      <td>${hitBadges}</td>
+      <td style="text-align:center;font-weight:700;color:${sc===3?'var(--green)':sc===1?'var(--orange)':'var(--red)'}">${sc}점</td>
+    </tr>`;
+  }).join('');
+
+  // 적용형 상세
+  let apRows = Object.entries(AP_Q).map(([q,title])=>{
+    const ans = r[q]||'';
+    const ok = ans.length>=15;
+    return `<tr><td>Q${q.slice(1)} ${title}</td><td style="font-size:12px;max-width:300px">${ans||'<span style="color:#aaa">미작성</span>'}</td><td style="text-align:center;color:${ok?'var(--green)':'var(--red)'}">${ok?'✅ 1점':'❌ 0점'}</td></tr>`;
+  }).join('');
+
+  const modal = document.createElement('div');
+  modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:9999;overflow-y:auto;padding:20px';
+  modal.innerHTML = `
+    <div style="max-width:800px;margin:0 auto;background:#fff;border-radius:12px;padding:24px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+        <h2 style="color:var(--brand);font-size:18px">${name} 상세 답변 (${dept})</h2>
+        <button onclick="this.closest('div[style*=fixed]').remove()" style="background:var(--brand);color:#fff;border:none;border-radius:8px;padding:6px 14px;cursor:pointer">닫기</button>
+      </div>
+      <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap">
+        <div style="background:var(--light);border-radius:8px;padding:10px 16px;text-align:center"><div style="font-size:20px;font-weight:800;color:var(--brand)">${r.obj||0}</div><div style="font-size:11px;color:var(--muted)">객관식/50</div></div>
+        <div style="background:var(--light);border-radius:8px;padding:10px 16px;text-align:center"><div style="font-size:20px;font-weight:800;color:var(--brand)">${r.kw||0}</div><div style="font-size:11px;color:var(--muted)">키워드/39</div></div>
+        <div style="background:var(--light);border-radius:8px;padding:10px 16px;text-align:center"><div style="font-size:20px;font-weight:800;color:var(--brand)">${r.ap||0}</div><div style="font-size:11px;color:var(--muted)">적용형/7</div></div>
+        <div style="background:#e8f5e9;border-radius:8px;padding:10px 16px;text-align:center"><div style="font-size:20px;font-weight:800;color:var(--green)">+${r.voteBonus||0}</div><div style="font-size:11px;color:var(--muted)">최다득표</div></div>
+        <div style="background:#fff3e0;border-radius:8px;padding:10px 16px;text-align:center"><div style="font-size:20px;font-weight:800;color:var(--orange)">+${r.managerBonus||0}</div><div style="font-size:11px;color:var(--muted)">사업부장추천</div></div>
+        <div style="background:var(--brand);border-radius:8px;padding:10px 16px;text-align:center"><div style="font-size:20px;font-weight:800;color:#fff">${r.total||0}점</div><div style="font-size:11px;color:rgba(255,255,255,0.7)">최종</div></div>
+      </div>
+      <div style="font-weight:700;color:var(--brand);margin:16px 0 8px;font-size:14px">📝 객관식 (Q1~Q5)</div>
+      <table style="width:100%;border-collapse:collapse;font-size:13px;margin-bottom:16px">
+        <thead><tr style="background:var(--brand);color:#fff"><th style="padding:8px;text-align:left">문항</th><th style="padding:8px">선택</th><th style="padding:8px">결과</th></tr></thead>
+        <tbody>${objRows}</tbody>
+      </table>
+      <div style="font-weight:700;color:var(--brand);margin:16px 0 8px;font-size:14px">✏️ 주관식 키워드 채점 (Q6~Q18)</div>
+      <table style="width:100%;border-collapse:collapse;font-size:13px;margin-bottom:16px">
+        <thead><tr style="background:var(--brand);color:#fff"><th style="padding:8px;text-align:left">문항</th><th style="padding:8px;text-align:left">답변</th><th style="padding:8px">키워드</th><th style="padding:8px">점수</th></tr></thead>
+        <tbody>${kwRows}</tbody>
+      </table>
+      <div style="font-weight:700;color:var(--brand);margin:16px 0 8px;font-size:14px">🎯 업무적용형 (Q19~Q25)</div>
+      <table style="width:100%;border-collapse:collapse;font-size:13px;margin-bottom:16px">
+        <thead><tr style="background:var(--brand);color:#fff"><th style="padding:8px;text-align:left">문항</th><th style="padding:8px;text-align:left">답변</th><th style="padding:8px">점수</th></tr></thead>
+        <tbody>${apRows}</tbody>
+      </table>
+      <div style="font-weight:700;color:var(--brand);margin:16px 0 8px;font-size:14px">🏆 Q26 추천</div>
+      <div style="background:var(--light);border-radius:8px;padding:12px;font-size:13px">
+        추천한 사람: <strong>${r.q26||'선택 안 함'}</strong>
+      </div>
+    </div>`;
+  document.body.appendChild(modal);
+  modal.addEventListener('click', e=>{ if(e.target===modal) modal.remove(); });
 }
 
 function exportCSV() {
