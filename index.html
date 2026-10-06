@@ -123,6 +123,7 @@ select { width: 100%; padding: 10px 12px; border: 1.5px solid var(--border); bor
 .vote-table th { background: var(--mid); color: #fff; padding: 8px; }
 .vote-table td { padding: 8px; border-bottom: 1px solid var(--border); text-align: center; }
 .vote-winner { background: #fff9e6; font-weight: 700; }
+.vote-manager { background: #e8f4fd; font-weight: 700; }
 @media(max-width:480px){
   .rank-cards { flex-direction: column; }
   .stat-cards { grid-template-columns: repeat(2,1fr); }
@@ -660,20 +661,28 @@ function renderDash(rows) {
     </table>` : '<div class="section-title">[*] 사업부장 추천 현황</div><div style="color:var(--muted);font-size:13px;margin-bottom:16px">아직 사업부장 응답이 없습니다.</div>';
   document.getElementById('rankCards').insertAdjacentHTML('afterend', managerHTML);
 
-  // 추천자 상세 목록 (누가 누구를 추천했는지)
+  // 추천자 상세 목록 (사업부장 포함 전체 — 누가 누구를 추천했는지)
   const voteDetail = scored
-    .filter(r => r.q26 && MANAGERS[r.사업부||r.dept||''] !== (r.이름||r.name||''))
-    .map(r => ({ from: r.이름||r.name||'', dept: r.사업부||r.dept||'', to: r.q26 }));
+    .filter(r => r.q26)
+    .map(r => {
+      const dept = r.사업부||r.dept||'';
+      const name = r.이름||r.name||'';
+      const isMgr = MANAGERS[dept] === name;
+      return { from: name, dept: dept, to: r.q26, isMgr: isMgr };
+    });
 
-  document.getElementById('voteTable').innerHTML = `
-    <table class="vote-table">
-      <thead><tr><th>사업부</th><th>추천인</th><th>추천받은 사람</th><th>비고</th></tr></thead>
-      <tbody>${voteDetail.map(v => {
-        const isWinner = deptWinners[v.dept] && deptWinners[v.dept].name === v.to;
-        return '<tr class="'+(isWinner?'vote-winner':'')+'"><td>'+v.dept+'</td><td>'+v.from+'</td><td><strong>'+v.to+'</strong></td><td>'+(isWinner?'[TOP] 최다득표 (+3점)':'')+'</td></tr>';
-      }).join('')}</tbody>
-    </table>
-    ${voteDetail.length===0 ? '<div style="color:var(--muted);font-size:13px">아직 추천 데이터가 없습니다.</div>' : ''}`;
+  document.getElementById('voteTable').innerHTML = voteDetail.length === 0
+    ? '<div style="color:var(--muted);font-size:13px">아직 추천 데이터가 없습니다.</div>'
+    : '<table class="vote-table">'
+      + '<thead><tr><th>사업부</th><th>추천인</th><th>추천받은 사람</th><th>비고</th></tr></thead>'
+      + '<tbody>'
+      + voteDetail.map(v => {
+          const isWinner = deptWinners[v.dept] && deptWinners[v.dept].name === v.to;
+          const note = v.isMgr ? '[사업부장] +5점' : (isWinner ? '[최다득표] +3점' : '');
+          const cls = v.isMgr ? 'vote-manager' : (isWinner ? 'vote-winner' : '');
+          return '<tr class="'+cls+'"><td>'+v.dept+'</td><td>'+v.from+(v.isMgr?' ★':'')+'</td><td><strong>'+v.to+'</strong></td><td>'+note+'</td></tr>';
+        }).join('')
+      + '</tbody></table>';
 
   // 사업부별 탭
   const depts = ['전체',...Object.keys(MEMBERS)];
