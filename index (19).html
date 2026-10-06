@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>신바람 일터 컬처북 설문 — 테스코㈜ 2차</title>
+<style>
+:root {
+  --brand: #1F4E79;
+  --mid: #2E75B6;
+  --light: #DEEAF1;
+  --bg: #F8FAFB;
+  --card: #fff;
+  --border: #D0E4F0;
+  --text: #1a2533;
+  --muted: #5a7a96;
+  --green: #1a7a4a;
+  --red: #c0392b;
+  --orange: #d35400;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  box-sizing: border-box;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Pretendard', 'Apple SD Gothic Neo', sans-serif; background: var(--bg); color: var(--text); font-size: 15px; }
+/* 헤더 */
+.header { background: var(--brand); color: #fff; padding: 18px 20px 14px; text-align: center; }
+.header .corp { font-size: 11px; opacity: .7; letter-spacing: .5px; }
+.header h1 { font-size: 17px; font-weight: 700; margin: 4px 0 2px; }
+.header .sub { font-size: 12px; opacity: .75; }
+/* 탭 */
+.tabs { display: flex; background: #163d61; }
+.tab { flex: 1; padding: 11px 0; text-align: center; color: rgba(255,255,255,.6); font-size: 13px; cursor: pointer; border-bottom: 3px solid transparent; transition: .2s; }
+.tab.active { color: #fff; border-bottom-color: #5BC4F5; font-weight: 600; }
+/* 진행률 */
+.progress-bar { height: 4px; background: var(--light); }
+.progress-fill { height: 100%; background: var(--mid); transition: width .3s; width: 0%; }
+/* 섹션 */
+.section { display: none; }
+.section.active { display: block; }
+/* 폼 */
+.form-wrap { max-width: 680px; margin: 0 auto; padding: 20px 16px 60px; }
+/* 카드 */
+.card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 18px; margin-bottom: 14px; }
+.card-title { font-size: 13px; font-weight: 700; color: var(--brand); margin-bottom: 12px; display: flex; align-items: center; gap: 6px; }
+.chapter-tag { font-size: 10px; background: var(--light); color: var(--mid); padding: 2px 7px; border-radius: 10px; font-weight: 600; }
+/* 기본정보 */
+.field { margin-bottom: 14px; }
+.field label { font-size: 13px; font-weight: 600; color: var(--brand); display: block; margin-bottom: 6px; }
+.field input, .field select { width: 100%; padding: 10px 12px; border: 1.5px solid var(--border); border-radius: 8px; font-size: 14px; color: var(--text); background: #fff; }
+.field input:focus, .field select:focus { outline: none; border-color: var(--mid); }
+/* 동의 */
+.consent-box { background: var(--light); border-radius: 8px; padding: 14px; font-size: 12.5px; color: var(--muted); line-height: 1.6; margin-bottom: 14px; }
+.consent-box strong { color: var(--brand); }
+.consent-check { display: flex; align-items: flex-start; gap: 8px; margin-top: 10px; cursor: pointer; font-size: 13px; font-weight: 600; color: var(--text); }
+.consent-check input { margin-top: 2px; accent-color: var(--brand); width: 16px; height: 16px; flex-shrink: 0; }
+/* 문항 */
+.q-num { font-size: 13px; font-weight: 700; color: var(--brand); margin-bottom: 6px; }
+.q-text { font-size: 14px; font-weight: 600; margin-bottom: 12px; line-height: 1.5; }
+.options { display: flex; flex-direction: column; gap: 8px; }
+.option { display: flex; align-items: flex-start; gap: 10px; padding: 10px 12px; border: 1.5px solid var(--border); border-radius: 8px; cursor: pointer; transition: .15s; font-size: 14px; line-height: 1.4; }
+.option:hover { border-color: var(--mid); background: #f0f7ff; }
+.option input[type=radio] { accent-color: var(--brand); margin-top: 2px; flex-shrink: 0; }
+.option.selected { border-color: var(--mid); background: var(--light); }
+/* 주관식 */
+.textarea-wrap { position: relative; }
+textarea { width: 100%; padding: 10px 12px; border: 1.5px solid var(--border); border-radius: 8px; font-size: 14px; resize: vertical; min-height: 90px; font-family: inherit; line-height: 1.5; color: var(--text); }
+textarea:focus { outline: none; border-color: var(--mid); }
+.char-count { font-size: 11px; color: var(--muted); text-align: right; margin-top: 4px; }
+.char-count.ok { color: var(--green); font-weight: 600; }
+/* 드롭다운 */
+select { width: 100%; padding: 10px 12px; border: 1.5px solid var(--border); border-radius: 8px; font-size: 14px; color: var(--text); background: #fff; }
+/* 섹션 헤더 */
+.sec-header { background: var(--brand); color: #fff; padding: 10px 16px; font-size: 13px; font-weight: 700; margin-bottom: 0; border-radius: 8px 8px 0 0; }
+.sec-header + .card { border-radius: 0 0 10px 10px; border-top: none; }
+/* 제출 버튼 */
+.submit-btn { width: 100%; padding: 14px; background: var(--brand); color: #fff; border: none; border-radius: 10px; font-size: 16px; font-weight: 700; cursor: pointer; margin-top: 10px; transition: .2s; }
+.submit-btn:hover { background: var(--mid); }
+.submit-btn:disabled { background: #aaa; cursor: not-allowed; }
+/* 완료 */
+.done-card { text-align: center; padding: 60px 20px; }
+.done-card .emoji { font-size: 50px; margin-bottom: 16px; }
+.done-card h2 { font-size: 20px; color: var(--brand); margin-bottom: 8px; }
+.done-card p { color: var(--muted); font-size: 14px; }
+/* 관리자 */
+.admin-login { max-width: 400px; margin: 60px auto; padding: 30px; background: var(--card); border-radius: 12px; border: 1px solid var(--border); text-align: center; }
+.admin-login h3 { color: var(--brand); margin-bottom: 16px; }
+.admin-login input { width: 100%; padding: 10px; border: 1.5px solid var(--border); border-radius: 8px; font-size: 14px; margin-bottom: 10px; }
+.admin-login button { width: 100%; padding: 11px; background: var(--brand); color: #fff; border: none; border-radius: 8px; font-size: 14px; font-weight: 700; cursor: pointer; }
+.admin-wrap { max-width: 900px; margin: 0 auto; padding: 20px 16px; }
+.stat-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-bottom: 20px; }
+.stat-card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 14px; text-align: center; }
+.stat-card .num { font-size: 26px; font-weight: 800; color: var(--brand); }
+.stat-card .lbl { font-size: 11px; color: var(--muted); margin-top: 2px; }
+.rank-cards { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px; }
+.rank-card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 14px 18px; flex: 1; min-width: 160px; }
+.rank-card .medal { font-size: 22px; }
+.rank-card .name { font-size: 16px; font-weight: 700; color: var(--brand); margin: 4px 0 2px; }
+.rank-card .info { font-size: 12px; color: var(--muted); }
+.rank-card .score { font-size: 18px; font-weight: 800; color: var(--mid); }
+.dept-tabs { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 16px; }
+.dept-tab { padding: 5px 12px; border-radius: 20px; border: 1.5px solid var(--border); font-size: 12px; cursor: pointer; background: #fff; color: var(--muted); }
+.dept-tab.active { background: var(--brand); color: #fff; border-color: var(--brand); }
+.resp-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.resp-table th { background: var(--brand); color: #fff; padding: 8px 10px; text-align: left; }
+.resp-table td { padding: 8px 10px; border-bottom: 1px solid var(--border); }
+.resp-table tr:hover td { background: var(--light); }
+.badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 11px; background: var(--light); color: var(--mid); font-weight: 600; }
+.csv-btn { padding: 8px 16px; background: var(--green); color: #fff; border: none; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; margin-bottom: 16px; }
+.refresh-btn { padding: 8px 16px; background: var(--mid); color: #fff; border: none; border-radius: 8px; font-size: 13px; cursor: pointer; margin-left: 8px; margin-bottom: 16px; }
+.section-title { font-size: 15px; font-weight: 700; color: var(--brand); margin: 20px 0 10px; border-left: 4px solid var(--mid); padding-left: 10px; }
+.keyword-box { background: #f0f7ff; border: 1px solid var(--border); border-radius: 8px; padding: 12px; margin-bottom: 16px; font-size: 12px; line-height: 1.8; }
+.keyword-box h4 { color: var(--brand); margin-bottom: 6px; font-size: 13px; }
+.vote-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-bottom: 16px; }
+.vote-table th { background: var(--mid); color: #fff; padding: 8px; }
+.vote-table td { padding: 8px; border-bottom: 1px solid var(--border); text-align: center; }
+.vote-winner { background: #fff9e6; font-weight: 700; }
+@media(max-width:480px){
+  .rank-cards { flex-direction: column; }
+  .stat-cards { grid-template-columns: repeat(2,1fr); }
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="corp">TESTCOR ㈜ · 경영관리그룹 인사총무파트</div>
+  <h1>📋 신바람 일터 컬처북 설문조사</h1>
+  <div class="sub">2026년 4분기 · 2차 · 총 30문항</div>
+</div>
+
+<div class="tabs">
+  <div class="tab active" onclick="switchTab('survey')">📝 설문 참여</div>
+  <div class="tab" onclick="switchTab('admin')">📊 응답 현황</div>
+</div>
+<div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+
+<!-- 설문 섹션 -->
+<div class="section active" id="sec-survey">
+  <div class="form-wrap" id="formArea">
+
+    <!-- 기본정보 -->
+    <div class="card">
+      <div class="card-title">기본 정보</div>
+      <div class="field"><label>이름 *</label><input type="text" id="fname" placeholder="홍길동"></div>
+      <div class="field">
+        <label>사업장 *</label>
+        <select id="fsite" onchange="updateDept()">
+          <option value="">-- 선택 --</option>
+          <option>대전 본사공장</option>
+          <option>개발센터</option>
+          <option>진주공장</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>사업부 *</label>
+        <select id="fdept" onchange="updateNameList()">
+          <option value="">-- 사업장을 먼저 선택하세요 --</option>
+        </select>
+      </div>
+      <div class="consent-box">
+        <strong>📌 설문 목적 및 개인정보 수집·이용 안내</strong><br>
+        <strong>설문 목적:</strong> 신바람 일터 컬처북 숙지도 및 이행수준 점검<br>
+        <strong>운영 주기:</strong> 분기 1회 (인사총무파트 주관)<br>
+        <strong>결과 활용:</strong> 사업장별 우수 직원 선정, 대표이사 격려금 지급 (2026년도)<br>
+        <strong>수집 항목:</strong> 이름, 소속(사업장·사업부) | <strong>보유 기간:</strong> 설문 종료 후 1년<br><br>
+        💡 <strong>솔직하고 정직한 응답을 부탁드립니다.</strong><br>
+        정답을 모르더라도 솔직하게 응답해 주시면 더 나은 교육 방향을 만드는 데 도움이 됩니다.
+        <label class="consent-check"><input type="checkbox" id="fConsent"> 위 내용을 확인하였으며, 개인정보 수집·이용에 동의하고 솔직하게 응답할 것을 약속합니다. *</label>
+      </div>
+    </div>
+
+    <!-- 객관식 Q1~Q5 -->
+    <div class="sec-header">📚 객관식 (Q1~Q5)</div>
+    <div class="card">
+      <div class="q-num">Q1 <span class="chapter-tag">제2장</span></div>
+      <div class="q-text">업무 중 긴급 지시를 받았을 때 가장 먼저 해야 할 행동은?</div>
+      <div class="options" id="q1">
+        <label class="option"><input type="radio" name="q1" value="a"> 하던 업무를 마무리한 뒤 처리한다</label>
+        <label class="option"><input type="radio" name="q1" value="b"> 즉시 수용 의지를 표현하고 핵심 요점을 15초 안에 확인한다</label>
+        <label class="option"><input type="radio" name="q1" value="c"> 직속 상사에게 먼저 보고 후 처리 여부를 결정한다</label>
+        <label class="option"><input type="radio" name="q1" value="d"> 메모 후 우선순위를 스스로 판단해 처리한다</label>
+      </div>
+    </div>
+    <div class="card">
+      <div class="q-num">Q2 <span class="chapter-tag">제3장</span></div>
+      <div class="q-text">이석 및 외출 기준으로 올바른 것은?</div>
+      <div class="options" id="q2">
+        <label class="option"><input type="radio" name="q2" value="a"> 30분 이내 자리 비움은 별도 보고 없이 이동해도 된다</label>
+        <label class="option"><input type="radio" name="q2" value="b"> 외출 후 직귀 시 회사에 따로 연락하지 않아도 된다</label>
+        <label class="option"><input type="radio" name="q2" value="c"> 30분 이상 사내 이석 시 상사에게 목적·귀환시간을 보고한다</label>
+        <label class="option"><input type="radio" name="q2" value="d"> 외출은 귀환 후 이카운트에 등록하면 된다</label>
+      </div>
+    </div>
+    <div class="card">
+      <div class="q-num">Q3 <span class="chapter-tag">제4장</span></div>
+      <div class="q-text">직장 내 괴롭힘을 금지하는 법적 근거 조항은?</div>
+      <div class="options" id="q3">
+        <label class="option"><input type="radio" name="q3" value="a"> 근로기준법 제56조</label>
+        <label class="option"><input type="radio" name="q3" value="b"> 근로기준법 제76조의2</label>
+        <label class="option"><input type="radio" name="q3" value="c"> 산업안전보건법 제4조</label>
+        <label class="option"><input type="radio" name="q3" value="d"> 남녀고용평등법 제12조</label>
+      </div>
+    </div>
+    <div class="card">
+      <div class="q-num">Q4 <span class="chapter-tag">제6장</span></div>
+      <div class="q-text">피라미드 원칙에 따른 문서 작성 방식으로 올바른 것은?</div>
+      <div class="options" id="q4">
+        <label class="option"><input type="radio" name="q4" value="a"> 배경 설명 → 근거 제시 → 결론 순으로 작성한다</label>
+        <label class="option"><input type="radio" name="q4" value="b"> 결론을 먼저 쓰고 이를 뒷받침하는 근거를 아래에 배치한다</label>
+        <label class="option"><input type="radio" name="q4" value="c"> 사실을 나열한 후 독자가 스스로 결론을 도출하게 한다</label>
+        <label class="option"><input type="radio" name="q4" value="d"> 중요도와 무관하게 시간 순서대로 작성한다</label>
+      </div>
+    </div>
+    <div class="card">
+      <div class="q-num">Q5 <span class="chapter-tag">제8장 Rule 08</span></div>
+      <div class="q-text">Rule 08에 따른 회식 2차·3차 원칙으로 맞는 것은?</div>
+      <div class="options" id="q5">
+        <label class="option"><input type="radio" name="q5" value="a"> 임원도 분위기에 따라 2차에 참여할 수 있다</label>
+        <label class="option"><input type="radio" name="q5" value="b"> 임원은 원칙적으로 2차·3차에 참여하지 않는다</label>
+        <label class="option"><input type="radio" name="q5" value="c"> 2차 참여는 전 직원 자율이며 별도 기준이 없다</label>
+        <label class="option"><input type="radio" name="q5" value="d"> 사업부장 이상은 2차 참여가 의무다</label>
+      </div>
+    </div>
+
+    <!-- 내용기술형 Q6~Q18 -->
+    <div class="sec-header" style="margin-top:14px">✏️ 내용기술형 주관식 (Q6~Q18)</div>
+    <div class="card">
+      <div class="q-num">Q6 <span class="chapter-tag">제1장</span></div>
+      <div class="q-text">직장을 바라보는 세 가지 시각(월급형·의무형·투자형)을 각각 설명하고, 테스코㈜가 권장하는 시각은 무엇인지 쓰시오.</div>
+      <div class="textarea-wrap"><textarea id="q6" rows="4" oninput="updateChar(this,'c6')" placeholder="월급형: &#10;의무형: &#10;투자형: &#10;테스코㈜ 권장 시각:"></textarea></div>
+      <div class="char-count" id="c6">0자</div>
+    </div>
+    <div class="card">
+      <div class="q-num">Q7 <span class="chapter-tag">제1장</span></div>
+      <div class="q-text">GTD 업무 관리 4단계를 순서대로 쓰시오.</div>
+      <div class="textarea-wrap"><textarea id="q7" rows="3" oninput="updateChar(this,'c7')" placeholder="1단계:    2단계:    3단계:    4단계:"></textarea></div>
+      <div class="char-count" id="c7">0자</div>
+    </div>
+    <div class="card">
+      <div class="q-num">Q8 <span class="chapter-tag">제2장</span></div>
+      <div class="q-text">이슈 등급 4단계(레드·오렌지·옐로우·그린)의 기준과 보고 시한을 각각 설명하시오.</div>
+      <div class="textarea-wrap"><textarea id="q8" rows="5" oninput="updateChar(this,'c8')" placeholder="레드: &#10;오렌지: &#10;옐로우: &#10;그린:"></textarea></div>
+      <div class="char-count" id="c8">0자</div>
+    </div>
+    <div class="card">
+      <div class="q-num">Q9 <span class="chapter-tag">제2장</span></div>
+      <div class="q-text">긴급 보고 5단계 CIPER를 순서대로 쓰고, 각 단계의 의미를 설명하시오.</div>
+      <div class="textarea-wrap"><textarea id="q9" rows="4" oninput="updateChar(this,'c9')" placeholder="C:    I:    P:    E:    R:"></textarea></div>
+      <div class="char-count" id="c9">0자</div>
+    </div>
+    <div class="card">
+      <div class="q-num">Q10 <span class="chapter-tag">제3장</span></div>
+      <div class="q-text">상위 상사 앞에서 직속 상사를 언급할 때의 호칭 원칙을 쓰고, 그 이유를 설명하시오.</div>
+      <div class="textarea-wrap"><textarea id="q10" rows="3" oninput="updateChar(this,'c10')" placeholder="호칭 원칙: &#10;이유:"></textarea></div>
+      <div class="char-count" id="c10">0자</div>
+    </div>
+    <div class="card">
+      <div class="q-num">Q11 <span class="chapter-tag">제3장</span></div>
+      <div class="q-text">전화를 받을 때 지켜야 할 원칙을 3가지 이상 기술하시오.</div>
+      <div class="textarea-wrap"><textarea id="q11" rows="4" oninput="updateChar(this,'c11')" placeholder="1. &#10;2. &#10;3. &#10;4. (선택)"></textarea></div>
+      <div class="char-count" id="c11">0자</div>
+    </div>
+    <div class="card">
+      <div class="q-num">Q12 <span class="chapter-tag">제4장</span></div>
+      <div class="q-text">성희롱 판단 기준이 '행위자 기준'이 아닌 '피해자 기준'인 이유를 컬처북 내용을 바탕으로 설명하시오.</div>
+      <div class="textarea-wrap"><textarea id="q12" rows="3" oninput="updateChar(this,'c12')" placeholder="답변을 입력하세요"></textarea></div>
+      <div class="char-count" id="c12">0자</div>
+    </div>
+    <div class="card">
+      <div class="q-num">Q13 <span class="chapter-tag">제5장</span></div>
+      <div class="q-text">ERP 전자결재 7대 원칙 중 '선결재 후집행' 외에 본인이 기억하는 원칙을 3가지 이상 쓰시오.</div>
+      <div class="textarea-wrap"><textarea id="q13" rows="4" oninput="updateChar(this,'c13')" placeholder="1. &#10;2. &#10;3. &#10;4. (선택)"></textarea></div>
+      <div class="char-count" id="c13">0자</div>
+    </div>
+    <div class="card">
+      <div class="q-num">Q14 <span class="chapter-tag">제5장</span></div>
+      <div class="q-text">법인카드 사용 원칙과 사용 후 처리 절차를 설명하시오.</div>
+      <div class="textarea-wrap"><textarea id="q14" rows="4" oninput="updateChar(this,'c14')" placeholder="사용 원칙: &#10;처리 절차:"></textarea></div>
+      <div class="char-count" id="c14">0자</div>
+    </div>
+    <div class="card">
+      <div class="q-num">Q15 <span class="chapter-tag">제6장</span></div>
+      <div class="q-text">아이젠하워 매트릭스 4사분면을 설명하고, 각 사분면에 해당하는 행동 방침을 쓰시오.</div>
+      <div class="textarea-wrap"><textarea id="q15" rows="5" oninput="updateChar(this,'c15')" placeholder="긴급+중요: &#10;긴급+비중요: &#10;비긴급+중요: &#10;비긴급+비중요:"></textarea></div>
+      <div class="char-count" id="c15">0자</div>
+    </div>
+    <div class="card">
+      <div class="q-num">Q16 <span class="chapter-tag">제7장</span></div>
+      <div class="q-text">프롬프트 작성 시 포함해야 할 5가지 요소를 쓰시오.</div>
+      <div class="textarea-wrap"><textarea id="q16" rows="4" oninput="updateChar(this,'c16')" placeholder="1.    2.    3.    4.    5."></textarea></div>
+      <div class="char-count" id="c16">0자</div>
+    </div>
+    <div class="card">
+      <div class="q-num">Q17 <span class="chapter-tag">제7장</span></div>
+      <div class="q-text">AI 활용 시 보안·윤리 수칙에서 입력하면 안 되는 정보 유형을 3가지 이상 쓰시오.</div>
+      <div class="textarea-wrap"><textarea id="q17" rows="4" oninput="updateChar(this,'c17')" placeholder="1. &#10;2. &#10;3. &#10;4. (선택)"></textarea></div>
+      <div class="char-count" id="c17">0자</div>
+    </div>
+    <div class="card">
+      <div class="q-num">Q18 <span class="chapter-tag">제8장 Rule 26</span></div>
+      <div class="q-text">Rule 26에 따르면 업무를 문서로 남겨야 하는 이유는 무엇인지 컬처북 내용을 바탕으로 설명하시오.</div>
+      <div class="textarea-wrap"><textarea id="q18" rows="3" oninput="updateChar(this,'c18')" placeholder="답변을 입력하세요"></textarea></div>
+      <div class="char-count" id="c18">0자</div>
+    </div>
+
+    <!-- 업무적용형 Q19~Q25 -->
+    <div class="sec-header" style="margin-top:14px">🎯 업무적용형 주관식 (Q19~Q25)</div>
+    <div class="card">
+      <div class="q-num">Q19 <span class="chapter-tag">제1장 적용</span></div>
+      <div class="q-text">본인의 현재 업무 스타일이 월급형·의무형·투자형 중 어디에 가깝다고 생각하는지 쓰고, 투자형으로 발전하기 위해 구체적으로 무엇을 바꿀 것인지 서술하시오.</div>
+      <div class="textarea-wrap"><textarea id="q19" rows="4" oninput="updateChar(this,'c19')"></textarea></div>
+      <div class="char-count" id="c19">0자</div>
+    </div>
+    <div class="card">
+      <div class="q-num">Q20 <span class="chapter-tag">제2장 적용</span></div>
+      <div class="q-text">최근 업무 중 보고가 늦거나 커뮤니케이션이 잘 안 됐던 경험을 떠올리고, PREP 보고법을 적용했다면 어떻게 달라졌을지 구체적으로 서술하시오.</div>
+      <div class="textarea-wrap"><textarea id="q20" rows="4" oninput="updateChar(this,'c20')"></textarea></div>
+      <div class="char-count" id="c20">0자</div>
+    </div>
+    <div class="card">
+      <div class="q-num">Q21 <span class="chapter-tag">제3장 적용</span></div>
+      <div class="q-text">본인이 평소 상사나 동료와의 소통에서 가장 개선이 필요하다고 느끼는 예절 항목을 하나 선택하고, 앞으로 어떻게 실천할 것인지 구체적으로 쓰시오.</div>
+      <div class="textarea-wrap"><textarea id="q21" rows="4" oninput="updateChar(this,'c21')"></textarea></div>
+      <div class="char-count" id="c21">0자</div>
+    </div>
+    <div class="card">
+      <div class="q-num">Q22 <span class="chapter-tag">제5장 적용</span></div>
+      <div class="q-text">본인이 담당하는 업무 중 ERP 전자결재와 관련된 업무를 하나 예시로 들고, 7대 원칙 중 본인이 가장 주의해야 할 원칙이 무엇인지 이유와 함께 서술하시오.</div>
+      <div class="textarea-wrap"><textarea id="q22" rows="4" oninput="updateChar(this,'c22')"></textarea></div>
+      <div class="char-count" id="c22">0자</div>
+    </div>
+    <div class="card">
+      <div class="q-num">Q23 <span class="chapter-tag">제7장 적용</span></div>
+      <div class="q-text">본인 업무에서 AI(클로드)를 활용할 수 있는 구체적인 사례를 2가지 이상 제시하고, 활용 시 주의해야 할 점을 함께 서술하시오.</div>
+      <div class="textarea-wrap"><textarea id="q23" rows="4" oninput="updateChar(this,'c23')"></textarea></div>
+      <div class="char-count" id="c23">0자</div>
+    </div>
+    <div class="card">
+      <div class="q-num">Q24 <span class="chapter-tag">제8장 적용</span></div>
+      <div class="q-text">Rule 01~30 중 본인에게 가장 와닿는 Rule 하나를 선택하고, 그 이유와 앞으로의 실천 계획을 구체적으로 서술하시오.</div>
+      <div class="textarea-wrap"><textarea id="q24" rows="4" oninput="updateChar(this,'c24')"></textarea></div>
+      <div class="char-count" id="c24">0자</div>
+    </div>
+    <div class="card">
+      <div class="q-num">Q25 <span class="chapter-tag">전체 적용</span></div>
+      <div class="q-text">이번 컬처북을 읽고 본인의 업무 태도나 행동에서 가장 크게 바꾸고 싶은 점 한 가지를 쓰고, 3개월 안에 실천할 구체적인 계획을 서술하시오.</div>
+      <div class="textarea-wrap"><textarea id="q25" rows="4" oninput="updateChar(this,'c25')"></textarea></div>
+      <div class="char-count" id="c25">0자</div>
+    </div>
+
+    <!-- 우수실천자 Q26 -->
+    <div class="sec-header" style="margin-top:14px">🏆 컬처북 우수 실천자 추천 (Q26)</div>
+    <div class="card">
+      <div class="q-num">Q26</div>
+      <div class="q-text">우리 사업부에서 신바람 일터 컬처북을 가장 잘 실천하고 있다고 생각하는 분을 선택해 주세요.<br><small style="color:var(--muted)">※ 본인 제외 · 선택 사항입니다.</small></div>
+      <select id="q26"><option value="">-- 선택 (선택 사항) --</option></select>
+    </div>
+
+    <!-- 성향 Q27~Q30 -->
+    <div class="sec-header" style="margin-top:14px">🔍 업무 성향 파악 (Q27~Q30)</div>
+    <div class="card">
+      <div class="q-num">Q27</div>
+      <div class="q-text">업무 중 모르는 상황이 생겼을 때 나의 첫 번째 행동은?</div>
+      <div class="options">
+        <label class="option"><input type="radio" name="q27" value="a"> 🔍 일단 스스로 찾아보고 해결해본 뒤, 그래도 모르면 질문한다.</label>
+        <label class="option"><input type="radio" name="q27" value="b"> 👥 바로 동료(팀원)에게 물어본다. 빠른 해결이 우선이다.</label>
+        <label class="option"><input type="radio" name="q27" value="c"> ⬆️ 바로 상사에게 보고하고 지시를 받는다.</label>
+        <label class="option"><input type="radio" name="q27" value="d"> 📋 메모하고 퇴근 전에 정리해서 한꺼번에 질문한다.</label>
+      </div>
+    </div>
+    <div class="card">
+      <div class="q-num">Q28</div>
+      <div class="q-text">업무 실수를 발견했을 때 나의 행동은?</div>
+      <div class="options">
+        <label class="option"><input type="radio" name="q28" value="a"> ⚡ 즉시 상사에게 보고하고 수습 방안을 함께 논의한다.</label>
+        <label class="option"><input type="radio" name="q28" value="b"> 🔧 일단 혼자 수습해보고, 해결되면 보고하지 않는다.</label>
+        <label class="option"><input type="radio" name="q28" value="c"> 👥 동료에게 먼저 상황을 공유하고 조언을 구한 뒤 보고한다.</label>
+        <label class="option"><input type="radio" name="q28" value="d"> 📝 원인 분석과 재발방지안을 먼저 작성한 뒤 보고한다.</label>
+      </div>
+    </div>
+    <div class="card">
+      <div class="q-num">Q29</div>
+      <div class="q-text">상사로부터 추가 업무 지시를 받았을 때 나의 반응은?</div>
+      <div class="options">
+        <label class="option"><input type="radio" name="q29" value="a"> ✅ "알겠습니다"라고 바로 수락하고 우선순위를 나중에 조정한다.</label>
+        <label class="option"><input type="radio" name="q29" value="b"> 🔄 현재 업무 현황을 설명하고 우선순위 확인 후 수락한다.</label>
+        <label class="option"><input type="radio" name="q29" value="c"> ⏱️ 가능한 완료 시점을 명확히 제시하고 조율한다.</label>
+        <label class="option"><input type="radio" name="q29" value="d"> 🤝 동료와 업무를 나눌 수 있는지 먼저 확인한다.</label>
+      </div>
+    </div>
+    <div class="card">
+      <div class="q-num">Q30</div>
+      <div class="q-text">동료와 의견 충돌이 생겼을 때 본인의 행동은?</div>
+      <div class="options">
+        <label class="option"><input type="radio" name="q30" value="a"> 💬 내 의견을 명확히 주장한다.</label>
+        <label class="option"><input type="radio" name="q30" value="b"> 👂 상대방 의견을 먼저 끝까지 듣는다.</label>
+        <label class="option"><input type="radio" name="q30" value="c"> 🙋 상사나 제3자에게 조정을 요청한다.</label>
+        <label class="option"><input type="radio" name="q30" value="d"> 🔁 일단 상대방 의견을 따르고 나중에 다시 얘기한다.</label>
+      </div>
+    </div>
+
+    <button class="submit-btn" onclick="submitForm()">제출하기 →</button>
+  </div>
+
+  <!-- 완료 화면 -->
+  <div id="doneArea" style="display:none">
+    <div class="done-card">
+      <div class="emoji">🎉</div>
+      <h2>제출 완료!</h2>
+      <p>소중한 의견이 테스코㈜ 신바람 일터 문화에 반영됩니다.<br>결과는 마감 후 별도 공지됩니다.</p>
+    </div>
+  </div>
+</div>
+
+<!-- 응답현황 섹션 -->
+<div class="section" id="sec-admin">
+  <div id="adminLogin" class="admin-login">
+    <h3>🔒 관리자 전용</h3>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:14px">비밀번호를 입력하세요.</p>
+    <input type="password" id="adminPw" placeholder="비밀번호" onkeydown="if(event.key==='Enter')checkAdmin()">
+    <div id="adminErr" style="color:var(--red);font-size:12px;margin-bottom:8px;display:none">비밀번호가 올바르지 않습니다.</div>
+    <button onclick="checkAdmin()">확인</button>
+  </div>
+  <div id="adminDash" style="display:none">
+    <div class="admin-wrap">
+      <button class="csv-btn" onclick="exportCSV()">📥 CSV 내보내기</button>
+      <button class="refresh-btn" onclick="loadData()">🔄 새로고침</button>
+
+      <!-- 채점 기준 -->
+      <div class="section-title">📋 채점 기준</div>
+      <div class="keyword-box">
+        <h4>객관식 (Q1~Q5) — 각 10점 = 50점</h4>
+        Q1 정답: b / Q2 정답: c / Q3 정답: b / Q4 정답: b / Q5 정답: b<br><br>
+        <h4>내용기술형 주관식 (Q6~Q18) — 각 3점 = 39점</h4>
+        키워드 2개↑ 3점 / 1개 1점 / 0개 0점<br>
+        Q6: 월급형·의무형·투자형, 투자형 / Q7: 수집·분류·실행·검토 / Q8: 레드·오렌지·옐로우·그린, 즉시/1시간/당일/주간<br>
+        Q9: CIPER, 상황·영향·현조치·에스컬레이션·해결책 / Q10: 님 생략, 예의·격식<br>
+        Q11: 3콜·소속+이름·메모, 3가지↑ / Q12: 피해자 기준·의도와 무관·주관적 불쾌감<br>
+        Q13: 증빙·권한·사실·적시·정확·연속·보완 중 3개↑ / Q14: 업무목적·영수증·ERP등록<br>
+        Q15: 긴급중요·긴급비중요·비긴급중요·비긴급비중요 / Q16: 역할·맥락·지시·형식·예시<br>
+        Q17: 고객정보·계약금액·내부문서·개인정보 중 3개↑ / Q18: 인수인계·내가없어도·조직<br><br>
+        <h4>업무적용형 주관식 (Q19~Q25) — 각 1점 = 7점 (작성 여부)</h4>
+        15자 이상 작성 시 1점<br><br>
+        <h4>성향 (Q27~Q30) — 점수 없음</h4>
+        <h4>가산점</h4>
+        Q26 최다득표자 +3점 (사업부별) / 사업부장 추천 +5점 (마감 후 수동)
+      </div>
+
+      <!-- 통계 -->
+      <div class="section-title">📊 응답 현황</div>
+      <div class="stat-cards" id="statCards"></div>
+
+      <!-- 순위 -->
+      <div class="section-title">🏆 우수자 순위</div>
+      <div class="rank-cards" id="rankCards"></div>
+
+      <!-- Q26 득표 -->
+      <div class="section-title">🗳️ Q26 추천 득표 집계</div>
+      <div id="voteTable"></div>
+
+      <!-- 사업부별 탭 -->
+      <div class="section-title">👥 사업부별 응답</div>
+      <div class="dept-tabs" id="deptTabs"></div>
+      <div style="overflow-x:auto">
+        <table class="resp-table">
+          <thead><tr><th>이름</th><th>사업장</th><th>사업부</th><th>기본점수</th><th>키워드점수</th><th>합계</th></tr></thead>
+          <tbody id="respBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbxFUqv_mLpwim88f60GpxxzLWyGMaxPnHy82yNowjVK4rQJmJcCAdA9xrQNU6dcQi6puQ/exec';
+const ADMIN_PW = 'testcor2026';
+
+const DEPT_MAP = {
+  '대전 본사공장': ['솔루션사업부','경영관리그룹','엔지니어링사업부','직속-1'],
+  '개발센터': ['재료시험사업부','캐노피개발부','캐노피사업부','항공전략기획','직속-2'],
+  '진주공장': ['텐나인사업부','기업부설연구소']
+};
+
+const MEMBERS = {
+  '솔루션사업부': ['이종훈','서동환','정종원','류상하','장효정','안병준'],
+  '경영관리그룹': ['안진영','권수정','이조원','이지은','송두영','백현우','이정구','조서연','조아정','조영우','최춘서'],
+  '엔지니어링사업부': ['오세훈','송지훈','김태환','유찬솔','심규석','이덕행','박재진','김원일','우태훈','김용기','전정군','김익회','이남석','박정배','박영범'],
+  '직속-1': ['표희성'],
+  '재료시험사업부': ['김효진','이관호','김상진','윤성진','박지호','정영훈','임혜진','심명수','이준수','마태동','장재형','박범준','오성현'],
+  '캐노피개발부': ['이태주','장가현','안재훈','김수호'],
+  '캐노피사업부': ['이용재','정지강','류승욱'],
+  '항공전략기획': ['오세장','이진규'],
+  '직속-2': ['정가영'],
+  '텐나인사업부': ['신윤호','김학수','신현우','민성식','강선대','이주연','김미혜','조흡준','심규현','하현준','이유진','최은주','신민아','조한빈','박재안','김영빈','정현두'],
+  '기업부설연구소': ['정우석','김영우','지세현','이승우']
+};
+
+// 채점 키워드
+const KEYWORDS = {
+  q6: ['월급형','의무형','투자형'],
+  q7: ['수집','분류','실행','검토'],
+  q8: ['레드','오렌지','옐로우','그린'],
+  q9: ['CIPER','상황','영향','에스컬레이션','해결'],
+  q10: ['님','생략'],
+  q11: ['3콜','소속','이름','메모'],
+  q12: ['피해자','의도','불쾌'],
+  q13: ['증빙','권한','사실','적시','정확','연속','보완'],
+  q14: ['업무','영수증','ERP','등록'],
+  q15: ['긴급','중요','비긴급','사분면'],
+  q16: ['역할','맥락','지시','형식','예시'],
+  q17: ['고객','계약','내부','개인정보'],
+  q18: ['인수인계','조직','문서']
+};
+
+const OBJ_ANSWERS = { q1:'b', q2:'c', q3:'b', q4:'b', q5:'b' };
+
+function updateDept() {
+  const site = document.getElementById('fsite').value;
+  const deptSel = document.getElementById('fdept');
+  deptSel.innerHTML = '<option value="">-- 선택 --</option>';
+  if (DEPT_MAP[site]) DEPT_MAP[site].forEach(d => { const o = document.createElement('option'); o.value = d; o.textContent = d; deptSel.appendChild(o); });
+  document.getElementById('q26').innerHTML = '<option value="">-- 선택 (선택 사항) --</option>';
+}
+
+function updateNameList() {
+  const dept = document.getElementById('fdept').value;
+  const me = document.getElementById('fname').value.trim();
+  const sel = document.getElementById('q26');
+  sel.innerHTML = '<option value="">-- 선택 (선택 사항) --</option>';
+  if (MEMBERS[dept]) MEMBERS[dept].filter(n => n !== me).forEach(n => { const o = document.createElement('option'); o.value = n; o.textContent = n; sel.appendChild(o); });
+}
+
+function updateChar(el, cid) {
+  const n = el.value.length;
+  const c = document.getElementById(cid);
+  c.textContent = n + '자';
+  c.className = 'char-count' + (n >= 15 ? ' ok' : '');
+  updateProgress();
+}
+
+function updateProgress() {
+  let filled = 0, total = 30;
+  ['q1','q2','q3','q4','q5'].forEach(q => { if(document.querySelector(`input[name="${q}"]:checked`)) filled++; });
+  for(let i=6;i<=25;i++) { const el=document.getElementById('q'+i); if(el&&el.value.trim()) filled++; }
+  ['q27','q28','q29','q30'].forEach(q => { if(document.querySelector(`input[name="${q}"]:checked`)) filled++; });
+  document.getElementById('progressFill').style.width = (filled/total*100)+'%';
+}
+
+function switchTab(t) {
+  document.querySelectorAll('.tab').forEach((el,i) => el.classList.toggle('active', (i===0&&t==='survey')||(i===1&&t==='admin')));
+  document.getElementById('sec-survey').classList.toggle('active', t==='survey');
+  document.getElementById('sec-admin').classList.toggle('active', t==='admin');
+}
+
+function checkAdmin() {
+  if(document.getElementById('adminPw').value === ADMIN_PW) {
+    document.getElementById('adminLogin').style.display='none';
+    document.getElementById('adminDash').style.display='block';
+    loadData();
+  } else {
+    document.getElementById('adminErr').style.display='block';
+  }
+}
+
+function scoreKeyword(text, keys) {
+  const t = text || '';
+  const hits = keys.filter(k => t.includes(k)).length;
+  return hits >= 2 ? 3 : hits === 1 ? 1 : 0;
+}
+
+function calcScore(row) {
+  // 객관식 50점
+  let obj = 0;
+  Object.entries(OBJ_ANSWERS).forEach(([q,a]) => { if(row[q]===a) obj+=10; });
+  // 주관식 키워드 39점
+  let kw = 0;
+  Object.entries(KEYWORDS).forEach(([q,keys]) => { kw += scoreKeyword(row[q]||'', keys); });
+  // 적용형 7점
+  let ap = 0;
+  for(let i=19;i<=25;i++) { if((row['q'+i]||'').length>=15) ap+=1; }
+  return { obj, kw, ap, total: obj+kw+ap };
+}
+
+let allRows = [];
+
+async function loadData() {
+  try {
+    const r = await fetch(GAS_URL + '?t=' + Date.now());
+    const d = await r.json();
+    allRows = d.rows || [];
+    renderDash(allRows);
+  } catch(e) {
+    document.getElementById('statCards').innerHTML = '<div style="color:var(--red);font-size:13px">데이터 불러오기 실패. GAS URL 확인 필요.</div>';
+  }
+}
+
+function renderDash(rows) {
+  const scored = rows.map(r => ({ ...r, ...calcScore(r) }));
+  // 통계
+  const total = scored.length;
+  const avg = total ? Math.round(scored.reduce((s,r)=>s+r.total,0)/total) : 0;
+  document.getElementById('statCards').innerHTML = `
+    <div class="stat-card"><div class="num">${total}</div><div class="lbl">총 응답</div></div>
+    <div class="stat-card"><div class="num">${avg}</div><div class="lbl">평균점수</div></div>
+    <div class="stat-card"><div class="num">${scored.filter(r=>r.obj===50).length}</div><div class="lbl">객관식 만점</div></div>
+    <div class="stat-card"><div class="num">${scored.filter(r=>r.total>=80).length}</div><div class="lbl">80점↑</div></div>
+  `;
+  // 순위
+  const sorted = [...scored].sort((a,b)=>b.total-a.total).slice(0,3);
+  const medals = ['🥇','🥈','🥉'];
+  document.getElementById('rankCards').innerHTML = sorted.map((r,i)=>`
+    <div class="rank-card">
+      <div class="medal">${medals[i]}</div>
+      <div class="name">${r.이름||r.name||'-'}</div>
+      <div class="info">${r.사업장||r.site||''} · ${r.사업부||r.dept||''}</div>
+      <div class="score">${r.total}점</div>
+    </div>`).join('');
+
+  // Q26 득표
+  const votes = {};
+  scored.forEach(r => { const v=r.q26; if(v) votes[v]=(votes[v]||0)+1; });
+  const vEntries = Object.entries(votes).sort((a,b)=>b[1]-a[1]);
+  document.getElementById('voteTable').innerHTML = vEntries.length ? `
+    <table class="vote-table">
+      <thead><tr><th>이름</th><th>득표수</th><th>비고</th></tr></thead>
+      <tbody>${vEntries.map((e,i)=>`<tr class="${i===0?'vote-winner':''}"><td>${e[0]}</td><td>${e[1]}표</td><td>${i===0?'🏆 최다득표 (+3점 대상)':''}</td></tr>`).join('')}</tbody>
+    </table>` : '<div style="color:var(--muted);font-size:13px">아직 추천 데이터가 없습니다.</div>';
+
+  // 사업부별 탭
+  const depts = ['전체',...Object.keys(MEMBERS)];
+  document.getElementById('deptTabs').innerHTML = depts.map((d,i)=>`<div class="dept-tab${i===0?' active':''}" onclick="filterDept('${d}',this)">${d==='기업부설연구소'?'연구소':d.replace('사업부','').replace('사업','')}</div>`).join('');
+  renderTable(scored, '전체');
+}
+
+function filterDept(dept, el) {
+  document.querySelectorAll('.dept-tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  const scored = allRows.map(r=>({...r,...calcScore(r)}));
+  renderTable(scored, dept);
+}
+
+function renderTable(scored, dept) {
+  const filtered = dept==='전체' ? scored : scored.filter(r=>(r.사업부||r.dept)===dept);
+  const sorted = [...filtered].sort((a,b)=>b.total-a.total);
+  document.getElementById('respBody').innerHTML = sorted.map(r=>`
+    <tr>
+      <td>${r.이름||r.name||'-'}</td>
+      <td>${r.사업장||r.site||''}</td>
+      <td><span class="badge">${r.사업부||r.dept||''}</span></td>
+      <td>${r.obj||0}</td>
+      <td>${(r.kw||0)+(r.ap||0)}</td>
+      <td><strong>${r.total||0}점</strong></td>
+    </tr>`).join('') || '<tr><td colspan="6" style="text-align:center;color:var(--muted)">응답 없음</td></tr>';
+}
+
+function exportCSV() {
+  const scored = allRows.map(r=>({...r,...calcScore(r)}));
+  const headers = ['이름','사업장','사업부','객관식점수','주관식키워드점수','적용형점수','합계점수','제출시간'];
+  const rows = scored.map(r=>[r.이름||r.name,r.사업장||r.site,r.사업부||r.dept,r.obj,r.kw+r.ap,r.ap,r.total,r.제출시간||'']);
+  const csv = '\uFEFF' + [headers,...rows].map(r=>r.map(v=>`"${String(v||'').replace(/"/g,'""')}"`).join(',')).join('\n');
+  const a = document.createElement('a'); a.href = 'data:text/csv;charset=utf-8,'+encodeURIComponent(csv);
+  a.download = '컬처북2차설문_'+new Date().toLocaleDateString('ko-KR')+'.csv'; a.click();
+}
+
+async function submitForm() {
+  const name = document.getElementById('fname').value.trim();
+  const site = document.getElementById('fsite').value;
+  const dept = document.getElementById('fdept').value;
+  const consent = document.getElementById('fConsent').checked;
+  if(!name||!site||!dept){ alert('이름, 사업장, 사업부를 입력해주세요.'); return; }
+  if(!consent){ alert('개인정보 수집·이용 동의가 필요합니다.'); return; }
+  // 객관식 필수
+  for(let i=1;i<=5;i++) { if(!document.querySelector(`input[name="q${i}"]:checked`)){ alert(`Q${i}에 답해주세요.`); return; } }
+  // 주관식 Q6~Q18 필수
+  for(let i=6;i<=18;i++) { if(!(document.getElementById('q'+i)?.value.trim())){ alert(`Q${i}에 답해주세요.`); return; } }
+  // Q19~Q25 필수
+  for(let i=19;i<=25;i++) { if(!(document.getElementById('q'+i)?.value.trim())){ alert(`Q${i}에 답해주세요.`); return; } }
+  // Q27~Q30 필수
+  for(let i=27;i<=30;i++) { if(!document.querySelector(`input[name="q${i}"]:checked`)){ alert(`Q${i}에 답해주세요.`); return; } }
+
+  const data = { name, site, dept };
+  for(let i=1;i<=5;i++) data['q'+i] = document.querySelector(`input[name="q${i}"]:checked`)?.value||'';
+  for(let i=6;i<=25;i++) data['q'+i] = document.getElementById('q'+i)?.value||'';
+  data.q26 = document.getElementById('q26').value;
+  for(let i=27;i<=30;i++) data['q'+i] = document.querySelector(`input[name="q${i}"]:checked`)?.value||'';
+
+  // 채점
+  const s = calcScore(data);
+  data.baseScore = s.obj; data.keywordScore = s.kw+s.ap; data.totalScore = s.total;
+
+  const btn = document.querySelector('.submit-btn');
+  btn.disabled = true; btn.textContent = '제출 중...';
+  try {
+    await fetch(GAS_URL, { method:'POST', mode:'no-cors', body: JSON.stringify(data) });
+  } catch(e) {}
+  setTimeout(() => {
+    document.getElementById('formArea').style.display='none';
+    document.getElementById('doneArea').style.display='block';
+  }, 800);
+}
+
+document.querySelectorAll('input[type=radio]').forEach(r => r.addEventListener('change', updateProgress));
+</script>
+</body>
+</html>
