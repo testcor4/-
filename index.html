@@ -356,50 +356,6 @@ select { width: 100%; padding: 10px 12px; border: 1.5px solid var(--border); bor
       <div class="q-text">우리 사업부에서 신바람 일터 컬처북을 가장 잘 실천하고 있다고 생각하는 분을 선택해 주세요.<br><small style="color:var(--muted)">※ 본인 제외 · 선택 사항입니다.</small></div>
       <select id="q26"><option value="">-- 선택 (선택 사항) --</option></select>
     </div>
-
-    <!-- 성향 Q27~Q30 -->
-    <div class="sec-header" style="margin-top:14px">🔍 업무 성향 파악 (Q27~Q30)</div>
-    <div class="card">
-      <div class="q-num">Q27</div>
-      <div class="q-text">업무 중 모르는 상황이 생겼을 때 나의 첫 번째 행동은?</div>
-      <div class="options">
-        <label class="option"><input type="radio" name="q27" value="a"> 🔍 일단 스스로 찾아보고 해결해본 뒤, 그래도 모르면 질문한다.</label>
-        <label class="option"><input type="radio" name="q27" value="b"> 👥 바로 동료(팀원)에게 물어본다. 빠른 해결이 우선이다.</label>
-        <label class="option"><input type="radio" name="q27" value="c"> ⬆️ 바로 상사에게 보고하고 지시를 받는다.</label>
-        <label class="option"><input type="radio" name="q27" value="d"> 📋 메모하고 퇴근 전에 정리해서 한꺼번에 질문한다.</label>
-      </div>
-    </div>
-    <div class="card">
-      <div class="q-num">Q28</div>
-      <div class="q-text">업무 실수를 발견했을 때 나의 행동은?</div>
-      <div class="options">
-        <label class="option"><input type="radio" name="q28" value="a"> ⚡ 즉시 상사에게 보고하고 수습 방안을 함께 논의한다.</label>
-        <label class="option"><input type="radio" name="q28" value="b"> 🔧 일단 혼자 수습해보고, 해결되면 보고하지 않는다.</label>
-        <label class="option"><input type="radio" name="q28" value="c"> 👥 동료에게 먼저 상황을 공유하고 조언을 구한 뒤 보고한다.</label>
-        <label class="option"><input type="radio" name="q28" value="d"> 📝 원인 분석과 재발방지안을 먼저 작성한 뒤 보고한다.</label>
-      </div>
-    </div>
-    <div class="card">
-      <div class="q-num">Q29</div>
-      <div class="q-text">상사로부터 추가 업무 지시를 받았을 때 나의 반응은?</div>
-      <div class="options">
-        <label class="option"><input type="radio" name="q29" value="a"> ✅ "알겠습니다"라고 바로 수락하고 우선순위를 나중에 조정한다.</label>
-        <label class="option"><input type="radio" name="q29" value="b"> 🔄 현재 업무 현황을 설명하고 우선순위 확인 후 수락한다.</label>
-        <label class="option"><input type="radio" name="q29" value="c"> ⏱️ 가능한 완료 시점을 명확히 제시하고 조율한다.</label>
-        <label class="option"><input type="radio" name="q29" value="d"> 🤝 동료와 업무를 나눌 수 있는지 먼저 확인한다.</label>
-      </div>
-    </div>
-    <div class="card">
-      <div class="q-num">Q30</div>
-      <div class="q-text">동료와 의견 충돌이 생겼을 때 본인의 행동은?</div>
-      <div class="options">
-        <label class="option"><input type="radio" name="q30" value="a"> 💬 내 의견을 명확히 주장한다.</label>
-        <label class="option"><input type="radio" name="q30" value="b"> 👂 상대방 의견을 먼저 끝까지 듣는다.</label>
-        <label class="option"><input type="radio" name="q30" value="c"> 🙋 상사나 제3자에게 조정을 요청한다.</label>
-        <label class="option"><input type="radio" name="q30" value="d"> 🔁 일단 상대방 의견을 따르고 나중에 다시 얘기한다.</label>
-      </div>
-    </div>
-
     <button class="submit-btn" onclick="submitForm()">제출하기 →</button>
   </div>
 
@@ -442,7 +398,7 @@ select { width: 100%; padding: 10px 12px; border: 1.5px solid var(--border); bor
         Q17: 고객정보·계약금액·내부문서·개인정보 중 3개↑ / Q18: 인수인계·내가없어도·조직<br><br>
         <h4>업무적용형 주관식 (Q19~Q25) — 각 1점 = 7점 (작성 여부)</h4>
         15자 이상 작성 시 1점<br><br>
-        <h4>성향 (Q27~Q30) — 점수 없음</h4>
+        
         <h4>가산점</h4>
         Q26 최다득표자 +3점 (사업부별) / 사업부장 추천 +5점 (마감 후 수동)
       </div>
@@ -464,7 +420,7 @@ select { width: 100%; padding: 10px 12px; border: 1.5px solid var(--border); bor
       <div class="dept-tabs" id="deptTabs"></div>
       <div style="overflow-x:auto">
         <table class="resp-table">
-          <thead><tr><th>이름</th><th>사업장</th><th>사업부</th><th>기본점수</th><th>키워드점수</th><th>합계</th></tr></thead>
+          <thead><tr><th>이름</th><th>사업장</th><th>사업부</th><th>기본점수</th><th>키워드점수</th><th>Q26가산점</th><th>합계</th></tr></thead>
           <tbody id="respBody"></tbody>
         </table>
       </div>
@@ -540,10 +496,10 @@ function updateChar(el, cid) {
 }
 
 function updateProgress() {
-  let filled = 0, total = 30;
+  let filled = 0, total = 25;
   ['q1','q2','q3','q4','q5'].forEach(q => { if(document.querySelector(`input[name="${q}"]:checked`)) filled++; });
   for(let i=6;i<=25;i++) { const el=document.getElementById('q'+i); if(el&&el.value.trim()) filled++; }
-  ['q27','q28','q29','q30'].forEach(q => { if(document.querySelector(`input[name="${q}"]:checked`)) filled++; });
+  
   document.getElementById('progressFill').style.width = (filled/total*100)+'%';
 }
 
@@ -617,7 +573,34 @@ function renderDash(rows) {
       <div class="score">${r.total}점</div>
     </div>`).join('');
 
-  // Q26 득표
+  // Q26 사업부별 최다득표 +3점 자동 반영
+  const votesByDept = {};
+  scored.forEach(r => {
+    const dept = r.사업부||r.dept||'';
+    const v = r.q26;
+    if(v && dept) {
+      if(!votesByDept[dept]) votesByDept[dept] = {};
+      votesByDept[dept][v] = (votesByDept[dept][v]||0)+1;
+    }
+  });
+  // 사업부별 최다득표자 찾기
+  const deptWinners = {};
+  Object.entries(votesByDept).forEach(([dept, votes]) => {
+    const winner = Object.entries(votes).sort((a,b)=>b[1]-a[1])[0];
+    if(winner) deptWinners[dept] = { name: winner[0], votes: winner[1] };
+  });
+  // 최다득표자에게 +3점 반영
+  scored.forEach(r => {
+    const dept = r.사업부||r.dept||'';
+    const name = r.이름||r.name||'';
+    if(deptWinners[dept] && deptWinners[dept].name === name) {
+      r.voteBonus = 3;
+      r.total = r.total + 3;
+    } else {
+      r.voteBonus = 0;
+    }
+  });
+  // Q26 득표 집계 (전체)
   const votes = {};
   scored.forEach(r => { const v=r.q26; if(v) votes[v]=(votes[v]||0)+1; });
   const vEntries = Object.entries(votes).sort((a,b)=>b[1]-a[1]);
@@ -650,6 +633,7 @@ function renderTable(scored, dept) {
       <td><span class="badge">${r.사업부||r.dept||''}</span></td>
       <td>${r.obj||0}</td>
       <td>${(r.kw||0)+(r.ap||0)}</td>
+      <td>${r.voteBonus||0}</td>
       <td><strong>${r.total||0}점</strong></td>
     </tr>`).join('') || '<tr><td colspan="6" style="text-align:center;color:var(--muted)">응답 없음</td></tr>';
 }
@@ -676,14 +660,11 @@ async function submitForm() {
   for(let i=6;i<=18;i++) { if(!(document.getElementById('q'+i)?.value.trim())){ alert(`Q${i}에 답해주세요.`); return; } }
   // Q19~Q25 필수
   for(let i=19;i<=25;i++) { if(!(document.getElementById('q'+i)?.value.trim())){ alert(`Q${i}에 답해주세요.`); return; } }
-  // Q27~Q30 필수
-  for(let i=27;i<=30;i++) { if(!document.querySelector(`input[name="q${i}"]:checked`)){ alert(`Q${i}에 답해주세요.`); return; } }
-
   const data = { name, site, dept };
   for(let i=1;i<=5;i++) data['q'+i] = document.querySelector(`input[name="q${i}"]:checked`)?.value||'';
   for(let i=6;i<=25;i++) data['q'+i] = document.getElementById('q'+i)?.value||'';
   data.q26 = document.getElementById('q26').value;
-  for(let i=27;i<=30;i++) data['q'+i] = document.querySelector(`input[name="q${i}"]:checked`)?.value||'';
+  
 
   // 채점
   const s = calcScore(data);
