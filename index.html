@@ -408,7 +408,7 @@ select { width: 100%; padding: 10px 12px; border: 1.5px solid var(--border); bor
         15자 이상 작성 시 1점<br><br>
         
         <h4>가산점</h4>
-        Q26 최다득표자 +3점 (사업부별) / 사업부장 추천 +5점 (마감 후 수동)
+        Q26 최다득표자 +3점 (사업부별 자동) / 사업부장 Q26 추천 +5점 (자동)
       </div>
 
       <!-- 통계 -->
@@ -428,7 +428,7 @@ select { width: 100%; padding: 10px 12px; border: 1.5px solid var(--border); bor
       <div class="dept-tabs" id="deptTabs"></div>
       <div style="overflow-x:auto">
         <table class="resp-table">
-          <thead><tr><th>이름</th><th>사업장</th><th>사업부</th><th>기본점수</th><th>키워드점수</th><th>Q26가산점</th><th>합계</th></tr></thead>
+          <thead><tr><th>이름</th><th>사업장</th><th>사업부</th><th>기본점수</th><th>키워드점수</th><th>Q26+3점</th><th>사업부장+5점</th><th>합계</th></tr></thead>
           <tbody id="respBody"></tbody>
         </table>
       </div>
@@ -444,6 +444,18 @@ const DEPT_MAP = {
   '대전 본사공장': ['솔루션사업부','경영관리그룹','엔지니어링사업부','직속-1'],
   '개발센터': ['재료시험사업부','캐노피개발부','캐노피사업부','항공전략기획','직속-2'],
   '진주공장': ['텐나인사업부','기업부설연구소']
+};
+
+const MANAGERS = {
+  '솔루션사업부': '이종훈',
+  '경영관리그룹': '최춘서',
+  '엔지니어링사업부': '오세훈',
+  '재료시험사업부': '김효진',
+  '캐노피개발부': '이태주',
+  '캐노피사업부': '이용재',
+  '항공전략기획': '오세장',
+  '텐나인사업부': '신윤호',
+  '기업부설연구소': '정우석'
 };
 
 const MEMBERS = {
@@ -608,10 +620,41 @@ function renderDash(rows) {
       r.voteBonus = 0;
     }
   });
+
+  // 사업부장 Q26 추천 → 추천받은 사람 +5점
+  const managerPicks = {}; // { dept: 추천받은사람 }
+  scored.forEach(r => {
+    const dept = r.사업부||r.dept||'';
+    const name = r.이름||r.name||'';
+    if(MANAGERS[dept] === name && r.q26) {
+      managerPicks[dept] = r.q26;
+    }
+  });
+  scored.forEach(r => {
+    const dept = r.사업부||r.dept||'';
+    const name = r.이름||r.name||'';
+    if(managerPicks[dept] && managerPicks[dept] === name) {
+      r.managerBonus = 5;
+      r.total = r.total + 5;
+    } else {
+      r.managerBonus = 0;
+    }
+  });
   // Q26 득표 집계 (전체)
   const votes = {};
   scored.forEach(r => { const v=r.q26; if(v) votes[v]=(votes[v]||0)+1; });
   const vEntries = Object.entries(votes).sort((a,b)=>b[1]-a[1]);
+  // 사업부장 추천 현황 표시
+  const managerHTML = Object.entries(managerPicks).length ?
+    `<div class="section-title">👑 사업부장 추천 현황 (+5점 자동반영)</div>
+    <table class="vote-table">
+      <thead><tr><th>사업부</th><th>사업부장</th><th>추천 인원</th></tr></thead>
+      <tbody>${Object.entries(managerPicks).map(([dept,pick])=>`
+        <tr><td>${dept}</td><td>${MANAGERS[dept]}</td><td><strong>${pick}</strong> (+5점)</td></tr>
+      `).join('')}</tbody>
+    </table>` : '<div class="section-title">👑 사업부장 추천 현황</div><div style="color:var(--muted);font-size:13px;margin-bottom:16px">아직 사업부장 응답이 없습니다.</div>';
+  document.getElementById('rankCards').insertAdjacentHTML('afterend', managerHTML);
+
   document.getElementById('voteTable').innerHTML = vEntries.length ? `
     <table class="vote-table">
       <thead><tr><th>이름</th><th>득표수</th><th>비고</th></tr></thead>
@@ -642,6 +685,7 @@ function renderTable(scored, dept) {
       <td>${r.obj||0}</td>
       <td>${(r.kw||0)+(r.ap||0)}</td>
       <td>${r.voteBonus||0}</td>
+      <td>${r.managerBonus||0}</td>
       <td><strong>${r.total||0}점</strong></td>
     </tr>`).join('') || '<tr><td colspan="6" style="text-align:center;color:var(--muted)">응답 없음</td></tr>';
 }
